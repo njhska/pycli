@@ -4,8 +4,9 @@ from io import StringIO
 from rich.console import Console
 
 import gemini_cli.app as app_module
-from gemini_cli.app import Application
-from gemini_cli.models import Conversation, Message
+from gemini_cli.app import Application, SessionState
+from gemini_cli.commands import Command
+from gemini_cli.models import Conversation, Message, PendingAttachment
 
 
 def test_display_history_renders_all_messages(monkeypatch) -> None:
@@ -53,3 +54,39 @@ def test_display_history_renders_all_messages(monkeypatch) -> None:
     assert "总计 15" in rendered
     assert "调用 Web Search：是" in rendered
 
+
+def test_display_user_message_renders_markdown_in_panel(monkeypatch) -> None:
+    output = StringIO()
+    test_console = Console(file=output, color_system=None, width=60)
+    monkeypatch.setattr(app_module, "console", test_console)
+
+    Application.display_user_message("# 标题\n\n- 第一项\n- 第二项")
+
+    rendered = output.getvalue()
+    assert "你（Markdown）" in rendered
+    assert "标题" in rendered
+    assert "• 第一项" in rendered
+    assert "• 第二项" in rendered
+    assert "╭" in rendered
+
+
+def test_new_command_resets_conversation_to_defaults() -> None:
+    application = Application.__new__(Application)
+    application.settings = type(
+        "Settings", (), {"default_model": "default-model", "websearch_default": False}
+    )()
+    application.state = SessionState(
+        model="other-model",
+        system_prompt="old prompt",
+        websearch=True,
+        conversation=object(),  # type: ignore[arg-type]
+        attachments=[PendingAttachment(data=b"data", mime_type="text/plain")],
+    )
+
+    application.handle_command(Command("new"))
+
+    assert application.state.conversation is None
+    assert application.state.model == "default-model"
+    assert application.state.system_prompt is None
+    assert application.state.websearch is False
+    assert application.state.attachments == []

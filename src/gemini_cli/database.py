@@ -99,7 +99,7 @@ class Database:
                 cursor.execute(
                     """
                     SELECT * FROM conversations
-                    ORDER BY updated_at DESC, id DESC
+                    ORDER BY id ASC
                     LIMIT %s
                     """,
                     (limit,),
@@ -189,4 +189,3 @@ class Database:
                 """,
                 (model, system_prompt, websearch, conversation_id),
             )
-

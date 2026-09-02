@@ -9,6 +9,7 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.panel import Panel
 from rich.table import Table
 
 from .commands import Command, parse_attachment, parse_command
@@ -125,6 +126,10 @@ class Application:
                 )
             elif command.name == "resume":
                 self.resume(command.argument.strip())
+            elif command.name == "new":
+                if command.argument.strip():
+                    raise ValueError("用法: /new")
+                self.new_conversation()
             elif command.name == "save":
                 self.save()
             elif command.name in {"help", "?"}:
@@ -176,6 +181,29 @@ class Application:
         messages = self.database.get_messages(conversation.id)
         self.display_history(conversation, messages)
 
+    def new_conversation(self) -> None:
+        self.state.conversation = None
+        self.state.model = self.settings.default_model
+        self.state.system_prompt = None
+        self.state.websearch = self.settings.websearch_default
+        self.state.attachments.clear()
+        console.print(
+            f"[green]已启动新对话。[/green] 模型 [cyan]{self.state.model}[/cyan] · "
+            f"Web Search [cyan]{'on' if self.state.websearch else 'off'}[/cyan]"
+        )
+
+    @staticmethod
+    def display_user_message(content: str) -> None:
+        console.print(
+            Panel(
+                Markdown(content),
+                title="[bold cyan]你（Markdown）[/bold cyan]",
+                title_align="left",
+                border_style="cyan",
+                padding=(0, 1),
+            )
+        )
+
     @staticmethod
     def display_history(
         conversation: Conversation,
@@ -196,7 +224,9 @@ class Application:
 
         for message in messages:
             if message.role == "user":
-                console.print("\n[bold cyan]你（Markdown）[/bold cyan]")
+                console.print()
+                Application.display_user_message(message.content)
+                continue
             elif message.role == "assistant":
                 console.print("\n[bold magenta]Gemini（Markdown）[/bold magenta]")
             else:
@@ -224,8 +254,8 @@ class Application:
         console.print(f"[green]已保存到 {path}[/green]")
 
     def chat(self, user_text: str) -> None:
-        console.print("\n[bold cyan]你（Markdown）[/bold cyan]")
-        console.print(Markdown(user_text))
+        console.print()
+        self.display_user_message(user_text)
         console.print("\n[bold magenta]Gemini（流式）[/bold magenta]")
 
         history = []
@@ -296,6 +326,7 @@ class Application:
 [bold]/file --base64 X --type T[/bold]  为下一轮暂存附件
 [bold]/resume[/bold]              列出历史对话
 [bold]/resume <id>|last[/bold]    恢复历史对话
+[bold]/new[/bold]                 启动新对话
 [bold]/model <名称>[/bold]        切换当前对话模型
 [bold]/save[/bold]                覆盖保存当前对话 Markdown
 [bold]/help[/bold]                显示帮助

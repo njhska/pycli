@@ -37,6 +37,7 @@ uv run gemini-cli
 /resume
 /resume <id>
 /resume last
+/new
 /model <模型名>
 /save
 /help
