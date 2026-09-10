@@ -34,11 +34,14 @@ class FakeConnection:
         return self.test_cursor
 
 
-def test_list_conversations_orders_by_id_ascending(monkeypatch) -> None:
+def test_list_conversations_selects_recent_items_and_orders_by_id_ascending(
+    monkeypatch,
+) -> None:
     database = Database({})
     cursor = FakeCursor()
     monkeypatch.setattr(database, "connect", lambda: FakeConnection(cursor))
 
-    assert database.list_conversations(limit=25) == []
+    assert database.list_conversations() == []
+    assert "ORDER BY id DESC LIMIT %s" in cursor.query
     assert "ORDER BY id ASC" in cursor.query
-    assert cursor.parameters == (25,)
+    assert cursor.parameters == (20,)

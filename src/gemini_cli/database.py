@@ -93,14 +93,17 @@ class Database:
                 )
                 return cursor.fetchone()
 
-    def list_conversations(self, limit: int = 100) -> list[Conversation]:
+    def list_conversations(self, limit: int = 20) -> list[Conversation]:
         with self.connect() as conn:
             with conn.cursor(row_factory=class_row(Conversation)) as cursor:
                 cursor.execute(
                     """
-                    SELECT * FROM conversations
+                    SELECT * FROM (
+                        SELECT * FROM conversations
+                        ORDER BY id DESC
+                        LIMIT %s
+                    ) AS recent_conversations
                     ORDER BY id ASC
-                    LIMIT %s
                     """,
                     (limit,),
                 )
