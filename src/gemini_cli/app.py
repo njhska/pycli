@@ -8,7 +8,6 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from rich.console import Console
-from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 
@@ -17,6 +16,7 @@ from .config import Settings
 from .database import Database
 from .export import export_markdown
 from .gemini import GeminiService
+from .markdown import Markdown
 from .models import Conversation, Message, PendingAttachment
 
 

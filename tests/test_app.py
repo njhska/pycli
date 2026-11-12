@@ -90,3 +90,21 @@ def test_new_command_resets_conversation_to_defaults() -> None:
     assert application.state.system_prompt is None
     assert application.state.websearch is False
     assert application.state.attachments == []
+
+
+def test_display_history_renders_mermaid_without_changing_message(monkeypatch) -> None:
+    output = StringIO()
+    monkeypatch.setattr(
+        app_module, "console", Console(file=output, color_system=None, width=100)
+    )
+    now = datetime.now(timezone.utc)
+    conversation = Conversation(7, "流程图", "model", None, False, now, now)
+    source = "```mermaid\nflowchart TD\nA[开始] --> B[结束]\n```"
+    message = Message(1, 7, "assistant", source, 1)
+
+    Application.display_history(conversation, [message])
+
+    rendered = output.getvalue()
+    assert "开始" in rendered and "结束" in rendered and "▼" in rendered
+    assert "flowchart TD" not in rendered
+    assert message.content == source

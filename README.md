@@ -28,6 +28,20 @@ uv run gemini-cli
 
 输入采用 Markdown。Enter 插入换行，Esc+Enter 发送，方向键、Home 和 End 可移动光标。
 
+完整回复和历史记录中的 `mermaid` 代码块会在本地渲染为带节点、连线和箭头的终端字符图。
+例如：
+
+````markdown
+```mermaid
+flowchart LR
+    A[开始] --> B{是否通过}
+    B -->|是| C[完成]
+    B -->|否| D[重试]
+```
+````
+
+无法解析或超出终端宽度的图会提示原因并保留源码。数据库和 Markdown 导出保留原始 Mermaid 内容。
+
 ## 命令
 
 ```text
