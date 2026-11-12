@@ -40,7 +40,7 @@ flowchart LR
 ```
 ````
 
-无法解析或超出终端宽度的图会提示原因并保留源码。数据库和 Markdown 导出保留原始 Mermaid 内容。
+无法解析或超出终端宽度的图会提示原因并保留源码。数据库保留原始 Mermaid 内容。
 
 ## 命令
 
@@ -53,7 +53,6 @@ flowchart LR
 /resume last
 /new
 /model <模型名>
-/save
 /help
 ```
 

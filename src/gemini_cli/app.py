@@ -14,7 +14,6 @@ from rich.table import Table
 from .commands import Command, parse_attachment, parse_command
 from .config import Settings
 from .database import Database
-from .export import export_markdown
 from .gemini import GeminiService
 from .markdown import Markdown
 from .models import Conversation, Message, PendingAttachment
@@ -130,8 +129,6 @@ class Application:
                 if command.argument.strip():
                     raise ValueError("用法: /new")
                 self.new_conversation()
-            elif command.name == "save":
-                self.save()
             elif command.name in {"help", "?"}:
                 self.show_help()
             else:
@@ -245,17 +242,7 @@ class Application:
                 )
         console.rule("[dim]历史记录结束[/dim]")
 
-    def save(self) -> None:
-        conversation = self.state.conversation
-        if not conversation:
-            raise ValueError("当前还没有可保存的对话")
-        messages = self.database.get_messages(conversation.id)
-        path = export_markdown(self.settings.save_dir, conversation, messages)
-        console.print(f"[green]已保存到 {path}[/green]")
-
     def chat(self, user_text: str) -> None:
-        console.print()
-        self.display_user_message(user_text)
         console.print("\n[bold magenta]Gemini（流式）[/bold magenta]")
 
         history = []
@@ -328,7 +315,6 @@ class Application:
 [bold]/resume <id>|last[/bold]    恢复历史对话
 [bold]/new[/bold]                 启动新对话
 [bold]/model <名称>[/bold]        切换当前对话模型
-[bold]/save[/bold]                覆盖保存当前对话 Markdown
 [bold]/help[/bold]                显示帮助
 """.strip()
         )

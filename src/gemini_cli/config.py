@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -23,7 +22,6 @@ class Settings:
     gemini_api_version: str
     default_model: str
     websearch_default: bool
-    save_dir: Path
     db_host: str
     db_port: int
     db_user: str
@@ -49,9 +47,6 @@ class Settings:
             websearch_default=_as_bool(
                 os.getenv("PYCLI_WEBSEARCH_DEFAULT", "true")
             ),
-            save_dir=Path(os.getenv("PYCLI_SAVE_DIR", "./conversations"))
-            .expanduser()
-            .resolve(),
             db_host=os.getenv("PYCLI_DB_HOST", "127.0.0.1"),
             db_port=int(os.getenv("PYCLI_DB_PORT", "5432")),
             db_user=os.getenv("PYCLI_DB_USER", "postgres"),
